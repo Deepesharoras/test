@@ -1,0 +1,116 @@
+<?php
+/*
+* Implements hook_field_info().
+*/
+/*function custom_select_field_info() {
+   $field_array = array(
+           'my_field_name' => array(
+           'label' => t('My Field'),
+           'description' => t('Description of My Field.'),
+           'settings' => array('max_length' => 255),
+           'instance_settings' => array('text_processing' => 0,),
+           'default_widget' => 'options_select',
+           'default_formatter' => 'states_field_options',
+        ),
+      );
+	 return $field_array;
+}
+
+function my_module_field_widget_info_alter(&$info) {
+  $widgets = array(
+    'options_select' => array('my_field_type'),
+  );
+  foreach ($widgets as $widget => $field_types) {
+        $info[$widget]['field types'] = array_merge($info[$widget]['field types'], $field_types);
+  }
+}*/
+
+function custom_select_form($form, &$form_state){
+
+  $form['custom_textfield'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Some Field'),
+  );
+	
+	$form['crust_size'] = array(
+  '#title' => t('Crust Size'),
+  '#type' => 'select',
+  '#description' => 'Select the desired pizza crust size.',
+	'#default_value' => isset($_SESSION['selected_layout']) ? $_SESSION['selected_layout'] : 0,
+  '#options' => array(t('--- SELECT ---'), t('10"'), t('12"'), t('16"')),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit Button'),
+  );
+
+  return $form;
+}
+
+function custom_select_form_submit($form, &$form_state){
+	//echo'<pre>';print_r($form_state);die;
+	
+	
+	//$form_state['rebuild'] = FALSE;
+	$form_state['redirect'] = 'test-node';
+	$form['crust_size']['#default_value'] = $form_state['values']['crust_size'];
+	
+	
+	  $_SESSION['selected_layout'] = $form_state['values']['crust_size'];
+    //drupal_set_message(t('Your layout %input', array('%input' => $form_state['value']['choice'])));
+    switch ($form_state['values']['crust_size']) {
+        case '1' : {
+
+                //echo 'hi';die;
+                //drupal_goto("layout_1" . $options);
+								$form_state['redirect'] = 'test-node/6';
+                break;
+            }
+        case '2' : {
+                //echo 'no';die;
+                //drupal_goto("layout_2" . $options);
+								$form_state['redirect'] = 'test-node/7';
+                break;
+            }
+        case '3' : {
+                //drupal_goto("layout_3" . $options);
+								$form_state['redirect'] = 'test-node/3';
+                break;
+            }
+        default: {
+                print 'Select it!';
+            }
+    }
+	
+}
+
+//https://drupal.stackexchange.com/questions/149812/how-can-we-retain-dropdown-list-value-when-we-select-the-option
+
+/**
+ * Implements hook_block_info().
+ */
+function custom_select_block_info() {
+  $blocks = array();
+
+  $blocks['MYBLOCK'] = array(
+    'info' => t('My block'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function custom_select_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'MYBLOCK':
+      $block['subject'] = t('My block title');
+      $block['content'] = drupal_get_form('custom_select_form');
+    break;
+  }
+  return $block;
+}
